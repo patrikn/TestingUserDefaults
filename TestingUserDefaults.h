@@ -8,6 +8,7 @@
 - (void) setBool: (BOOL) value forKey: (NSString*) defaultName;
 
 - (id) objectForKey: (NSString*) defaultName;
+- (NSArray *) arrayForKey: (NSString *)defaultName;
 - (NSInteger) integerForKey: (NSString*) defaultName;
 - (BOOL) boolForKey: (NSString*) defaultName;
 - (NSDictionary*) dictionaryForKey: (NSString*) defaultName;

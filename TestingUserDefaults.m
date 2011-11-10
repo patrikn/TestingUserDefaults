@@ -88,6 +88,11 @@ static NSString *tempDir;
     return [data objectForKey:defaultName];
 }
 
+- (NSArray *)arrayForKey:(NSString *)defaultName
+{
+    return [NSArray arrayWithArray:[data objectForKey:defaultName]];
+}
+
 - (NSInteger) integerForKey: (NSString*) defaultName
 {
     return [[data objectForKey:defaultName] integerValue];
