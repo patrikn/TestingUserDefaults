@@ -4,24 +4,52 @@
 @property(retain) NSMutableDictionary *data;
 @end
 
+static NSString *tempDir;
+
 @implementation TestingUserDefaults
 @synthesize data;
 
++ (NSString *)dataFile
+{
+    NSString *filePath = [tempDir stringByAppendingPathComponent:@"defaults"];
+    
+    return filePath;
+}
+
 + (id) freshDefaults
 {
-    return [[[self alloc] init] autorelease];
+    tempDir = NSTemporaryDirectory();
+    NSString *dataFile = [TestingUserDefaults dataFile];
+    NSError *error = nil;
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    if ([fileManager fileExistsAtPath:dataFile]) {
+        [fileManager removeItemAtPath:dataFile error:&error];
+        if (error != nil) {
+            @throw error;
+        }
+    }
+    return [TestingUserDefaults loadDefaults];
+}
+
++ (id)loadDefaults
+{
+    TestingUserDefaults *defaults = [[[self alloc] init] autorelease];
+    NSMutableDictionary *savedDefaults = [NSMutableDictionary dictionaryWithContentsOfFile:[TestingUserDefaults dataFile]];
+    [defaults.data addEntriesFromDictionary:savedDefaults];
+    return defaults;
 }
 
 - (id) init
 {
     [super init];
-    data = [[NSMutableDictionary alloc] init];
+    self.data = [NSMutableDictionary dictionary];
+    
     return self;
 }
 
 - (void) dealloc
 {
-    [data release];
+    self.data = nil;
     [super dealloc];
 }
 
@@ -42,8 +70,15 @@
     [data setObject:[NSNumber numberWithBool:value] forKey:defaultName];
 }
 
+- (void) removeObjectForKey: (NSString*) defaultName
+{
+    [data removeObjectForKey:defaultName];
+}
+
 - (void) synchronize {
-    // no-op
+    NSString *dataFile = [TestingUserDefaults dataFile];
+    
+    [data writeToFile:dataFile atomically:TRUE];
 }
 
 #pragma mark Reading
@@ -63,4 +98,10 @@
     return [[data objectForKey:defaultName] boolValue];
 }
 
+- (NSDictionary *) dictionaryForKey:(NSString *)defaultName
+{
+    NSDictionary *dict = [data objectForKey:defaultName];
+    
+    return dict != nil ? [NSDictionary dictionaryWithDictionary:dict] : nil;
+}
 @end
